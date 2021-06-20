@@ -1,5 +1,13 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Home from '../views/Home.vue'
+import cookies from '../utils/cookies'
+
+const requireAuth = () => (to, from, next) => {
+  if (cookies.getAuthFromCookie() !== '' && cookies.getAuthFromCookie() !== null) {
+    return next()
+  }
+  next('/login')
+}
 
 const routes = [
   {
@@ -8,12 +16,47 @@ const routes = [
     component: Home
   },
   {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '/customer',
+    component: () => import('@/views/Customer.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/customerHome.vue')
+      },
+      {
+        path: 'register',
+        component: () => import('@/views/customerRegister.vue')
+      },
+      {
+        path: 'list',
+        component: () => import('@/views/customerVocList.vue')
+      }
+    ]
+  },
+  {
+    path: '/manager',
+    beforeEnter: requireAuth(),
+    component: () => import('@/views/Manager.vue'),
+    children: [
+      {
+        name: 'manager',
+        path: '',
+        component: () => import('@/views/managerHome.vue')
+      },
+      {
+        path: 'assign',
+        component: () => import('@/views/managerAssign.vue')
+      },
+      {
+        path: 'reply',
+        component: () => import('@/views/managerReply.vue')
+      }
+    ]
+  },
+  {
+    name: 'login',
+    path: '/login',
+    component: () => import('@/views/ManagerLogin.vue')
   }
 ]
 
